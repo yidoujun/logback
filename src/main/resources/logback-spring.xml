@@ -1,51 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="60 seconds">
-    <property name="LOG_HOME" value="/home/ypcfly/ypcfly/Log" />
-    <!-- 控制台设置 -->
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d{MM-dd-yyyy HH:mm:ss} %-5level [%thread%X{sourceThread}]%logger{24}-%msg%n</pattern>
-        </encoder>
-    </appender>
-    <!-- INFO -->
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- 文件名称 -->
-            <fileNamePattern>${LOG_HOME}/log-file.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <MaxHistory>30</MaxHistory>
-        </rollingPolicy>
-        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-            <MaxFileSize>50MB</MaxFileSize>
-        </triggeringPolicy>
-        <encoder>
-            <pattern>%d{MM-dd-yyyy HH:mm:ss} %-5level [%thread]%logger{16} - %msg%n</pattern>
-        </encoder>
-    </appender>
+    <property name="LOG_HOME" value="/home/ypcfly/ypcfly/Log"/>
 
-    <!-- THIRD PART LOG -->
-    <appender name="THIRD_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <!-- console -->
+　　　<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+　　　　　 <encoder>
+　　　　　　　　　<pattern>%d{MM-dd-yyyy HH:mm:ss} %-5level [%thread%X{sourceThread}]%logger{24}-%msg%n</pattern>
+　　　　　 </encoder>
+　　　</appender>
+
+    <!-- stash使用tcp发送接受日志 -->
+    <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <param name="Encoding" value="UTF-8"/>
+        <remoteHost>127.0.0.1</remoteHost>
+        <port>5044</port>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+        </encoder>
+    </appender>
+    <!-- logstash使用file -->
+    <appender name="stash" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <append>true</append>
+        <encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder" />
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_HOME}/third-part-file.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>${LOG_HOME}/log-file.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-            <MaxFileSize>50MB</MaxFileSize>
+            <MaxFileSize>30MB</MaxFileSize>
         </triggeringPolicy>
-        <encoder>
-            <pattern>%d{MM-dd-yyyy HH:mm:ss} %-5level [%thread]%logger{16} - %msg%n</pattern>
-        </encoder>
     </appender>
-    <!-- 记录第三方切面日志的logger -->
-    <logger name="com.ypc.logtest.logback.aop.ThirdLogAspect" additivity="false" level="INFO">
-        <appender-ref ref="THIRD_FILE"/>
-    </logger>
-    <!-- 记录第三方service日志 -->
-    <logger name="third_part_call_log" additivity="false" level="INFO">
-        <appender-ref ref="THIRD_FILE"/>
-    </logger>
+
+    <!-- 其他日志输出 -->
+    <logger name="org.apache.ibatis" level="TRACE"/>
+    <logger name="java.sql.Connection" level="DEBUG"/>
+    <logger name="java.sql.PreparedStatement" level="DEBUG"/>
+    <logger name="java.sql.Statement" level="DEBUG"/>
+
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
+        <!--<appender-ref ref="logstash"/>-->
+        <appender-ref ref="stash"/>
     </root>
+
 </configuration>

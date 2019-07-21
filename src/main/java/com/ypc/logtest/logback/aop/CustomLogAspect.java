@@ -24,7 +24,7 @@ public class CustomLogAspect {
 
 	private Gson gson = new Gson();
 
-	@Around("within(com.ypc.logtest.logback.controller..*) && !@annotation(com.ypc.logtest.logback.aop.ThirdPart)")
+	@Around("within(com.ypc.logtest.logback.controller..*) && !target(com.ypc.logtest.logback.controller.MemberController) && !@annotation(com.ypc.logtest.logback.aop.ThirdPart)")
 	public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
 		// 目标类的名称
 		String className = joinPoint.getTarget().getClass().getName();
